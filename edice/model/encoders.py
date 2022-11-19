@@ -1,8 +1,10 @@
 import torch
 from torch import nn
 
+from edice.model.layers import eDICEBlock
 
-class InputExpander:
+
+class InputExpander(nn.Module):
 
     """
     Receives as input a vector of inputs as well as corresponding cell, assay ids
@@ -20,21 +22,22 @@ class InputExpander:
     """
 
     def __init__(self, n_nodes, n_feats):
+        super().__init__()
         self.n_nodes = n_nodes
         self.n_feats = n_feats
 
     # TODO: test
     def forward(self, flat_inputs, node_ids, feat_ids):
         assert flat_inputs.ndim == 2  # B, D
-        bsz, D = flat_inputs.shape[0]
-        batch_ids = torch.arange(bsz).expand(bsz, -1).tile(1, D)
+        bsz, D = flat_inputs.shape
+        batch_ids = torch.arange(bsz).view(bsz,1).tile(1, D)
 
         # flatten all id vectors
         batch_ids = batch_ids.flatten()
         node_ids = node_ids.flatten()
         feat_ids = feat_ids.flatten()
 
-        obs_mat = torch.zeros((bsz, n_nodes, n_feats)).to(flat_inputs)
+        obs_mat = torch.zeros((bsz, self.n_nodes, self.n_feats)).to(flat_inputs)
         obs_mat[batch_ids, node_ids, feat_ids] = flat_inputs.flatten()
         return obs_mat
 
@@ -48,9 +51,9 @@ class NodeInputMasker(nn.Module):
         return obs_mat, obs_counts
 
 
-class SignalEmbedding(nn.Module):
+class SignalEmbedder(nn.Module):
 
-    """Non-linear embedding of signal."""
+    """Non-linear embedding of per-entity (cell/assay) signal."""
     def __init__(
         self,
         n_nodes,

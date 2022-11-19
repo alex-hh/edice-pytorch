@@ -62,10 +62,8 @@ class MLP(nn.Module):
         squeeze=True,
     ):
         super().__init__()
-        self.layers = layers
         self.hidden_dim = hidden_dim
         self.dropout_prob = dropout_prob
-        print(self.dropout_prob)
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.output_activation = output_activation
@@ -77,7 +75,7 @@ class MLP(nn.Module):
                 activation=hidden_activation,
                 dropout_prob=self.dropout_prob or 0.,
                 batch_norm=batch_norm)
-            for i in range(layers)
+            for i in range(hidden_layers)
         ])
 
         self.fc_out = nn.Linear(hidden_dim, output_dim)
@@ -98,15 +96,18 @@ class eDICEBlock(nn.Module):
 
     def __init__(self, model_dim, num_heads, ffn_embed_dim, dropout=0.1, ffn_dropout=0.):
         super().__init__()
-        self.mha = nn.MultiHeadAttention(model_dim, num_heads, batch_first=True)
-        self.ffn = MLP(1, model_dim, ffn_embed_dim, model_dim, dropout=ffn_dropout)  # should have 1 hidden layer
+        self.mha = nn.MultiheadAttention(model_dim, num_heads, batch_first=True)
+        self.ffn = MLP(1, model_dim, ffn_embed_dim, model_dim, dropout_prob=ffn_dropout)  # should have 1 hidden layer
 
+        self.dropout = dropout
         self.dropout1 = nn.Dropout(self.dropout)
         self.dropout2 = nn.Dropout(self.dropout)
 
     def forward(self, x, mask=None):
         # mask is B, L
-        attn_output, attn_weights = self.mha(x, x, x, key_padding_mask=mask)
+        # Q. difference between attn_mask and key_padding_mask?
+        # https://stackoverflow.com/questions/62629644/what-the-difference-between-att-mask-and-key-padding-mask-in-multiheadattnetion
+        attn_output, attn_weights = self.mha(x, x, x, key_padding_mask=mask.squeeze(-1))
         attn_output = self.dropout1(attn_output)
         out1 = x + attn_output
 

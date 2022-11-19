@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 from edice import utils
-from edice.data.datasets import EpigenomeSliceDataset
+from edice.data.datasets import EpigenomeSliceDataset, EpigenomeSliceWithTargets
 from edice.data.dataset_config import load_dataset
 from edice.models.edice import eDICEModel, eDICE
 from edice.training import train
@@ -100,36 +100,39 @@ def main(args):
     )
 
     logger_list = [
-        loggers.StdOutLogger(log_freq=cfg["training"]["epochs"]//10),
+        loggers.StdOutLogger(log_freq=1),
         loggers.CSVLogger(output_dir),
     ]
     logger = loggers.LoggerContainer(logger_list)
 
     train_tracks = [t for split in args.train_splits for t in data.splits[split]]
     train_tracks, train_cell_ids, train_assay_ids = data.prepare_data(train_tracks)
-    train_data = EpigenomeSliceDataset(
-        train_tracks,
-        train_cell_ids,
-        train_assay_ids,
-        transform=args.transformation,
-    )
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
-
     if args.val_split is not None:
         val_tracks = data.splits[args.val_split]
         val_tracks, val_cell_ids, val_assay_ids = data.prepare_data(val_tracks)
-        val_data = EpigenomeSliceDataset(
+        data = EpigenomeSliceWithTargets(
+            train_tracks,
+            train_cell_ids,
+            train_assay_ids,
             val_tracks,
             val_cell_ids,
             val_assay_ids,
             transform=args.transformation,
         )
-        val_loader = torch.utils.data.DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
+        train_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=True)
+        val_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=False)
     else:
+        data = EpigenomeSliceDataset(
+            train_tracks,
+            train_cell_ids,
+            train_assay_ids,
+            transform=args.transformation,
+        )
+        train_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=True)
         val_loader = None
 
     hist = train(
-        learner,
+        edice,
         train_loader,
         epochs=args.epochs,
         logger=logger,

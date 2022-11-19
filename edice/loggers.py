@@ -7,6 +7,8 @@ import yaml
 import time
 import wandb
 
+from edice.utils import isnumeric
+
 
 def save_config(config, filepath, out_format="yaml"):
     if isinstance(config, argparse.Namespace):

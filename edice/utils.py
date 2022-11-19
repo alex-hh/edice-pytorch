@@ -2,6 +2,11 @@ import numpy as np
 import torch
 
 
+def isnumeric(v):
+    """Required because we support non numeric metrics for wandb."""
+    return isinstance(v, float) or isinstance(v, int) or np.isscalar(v)
+
+
 def get_device(force_cpu=False):
     if torch.cuda.is_available() and not force_cpu:
         device = torch.device('cuda')

@@ -1,6 +1,5 @@
 import torch
 from torch.nn import functional as F
-from edice.learners.base import BaseLearner
 
 
 class BaseLearner:

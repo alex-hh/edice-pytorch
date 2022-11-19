@@ -14,7 +14,7 @@ dataset_configs = {}
 ROADMAP = {"dataset_class": RoadmapDataModule,
            "filepath": "roadmap/roadmap_tracks_shuffled.h5",  # relative to data_dir
            "idmap": "data/roadmap/idmap.json",
-           "name": "RoadmapRnd"}  # relative to repo base
+           "name": "RoadmapRnd"}  # relative to repo base - what is this
 dataset_configs['RoadmapRnd'] = ROADMAP
 
 PREDICTD = copy.deepcopy(ROADMAP)
@@ -25,6 +25,10 @@ dataset_configs['PredictdRnd'] = PREDICTD
 ROADMAP_SAMPLE = copy.deepcopy(ROADMAP)
 ROADMAP_SAMPLE["filepath"] = "roadmap/SAMPLE_chr21_roadmap_train.h5"
 dataset_configs['RoadmapSample'] = ROADMAP_SAMPLE
+
+PREDICTD_SAMPLE = copy.deepcopy(ROADMAP_SAMPLE)
+PREDICTD_SAMPLE["splits"] = "data/roadmap/predictd_splits.json"  # relative to repo base
+dataset_configs['PredictdSample'] = PREDICTD_SAMPLE
 
 ROADMAPCHR21 = copy.deepcopy(ROADMAP)
 ROADMAPCHR21["filepath"] = "roadmap/chr21_roadmap_tracks.h5"

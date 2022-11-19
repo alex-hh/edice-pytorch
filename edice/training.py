@@ -2,6 +2,8 @@ from collections import defaultdict
 import time
 import torch
 
+from edice.utils import isnumeric
+
 
 class BaseMetricsContainer:
 
@@ -152,6 +154,6 @@ def train(
 
         hist.append(metrics)
         if logger is not None:
-            logger.log(epoch+start_epoch, metrics, batch=-1)
+            logger.log(epoch, metrics, batch=-1)
     return hist
 

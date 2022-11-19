@@ -5,14 +5,15 @@
     Currently supports data stored in HDF5 file (HDF5Dataset)
 """
 import os
+from pathlib import Path
 
 import h5py
 import numpy as np
 
 from edice.constants import DATA_DIR
 from edice.data.datasets import EpigenomeSliceDataset
-from edice.data.data_loaders import hdf5_utils
-from edice.data.data_loaders.annotations import IntervalAnnotation
+from edice.data import hdf5_utils
+from edice.data.annotations import IntervalAnnotation
 
 
 class HDF5DataModule:
