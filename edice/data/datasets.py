@@ -32,9 +32,8 @@ class EpigenomeSliceDataset:
 
 class EpigenomeSliceWithTargets:
 
+    """Dataset partitioning train and test tracks.
     """
-    TODO: to avoid duplication maybe use validationdataset during training also.
-    Requires feeding in inputs and targets."""
 
     def __init__(
         self,
